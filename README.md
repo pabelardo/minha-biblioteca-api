@@ -25,17 +25,18 @@ Este documento descreve o exercício de programação para a vaga de .NET Pleno 
 
 ## 3. Backend (Obrigatório)
 
-### Desenvolver uma API REST (.Net C#) que permita a criação, leitura, atualização e exclusão (CRUD) de gêneros, autores e livros.
-               Requisitos Técnicos (Desejáveis)
+*Desenvolver uma API REST (.Net C#) que permita a criação, leitura, atualização e exclusão (CRUD) de gêneros, autores e livros.*
 
-Boas práticas (exemplo: responsabilidade única, injeção de dependência, etc.)
-Versionamento da API (rotas)
-Documentação (exemplo: Swagger)
-Respostas padronizadas (HTTP Status Codes)
-Environments
-DTOs
-ViewModel
-Entidades
-ORM
-Migrations
-Testes de unidade
+Requisitos Técnicos (Desejáveis):
+
+* Boas práticas (exemplo: responsabilidade única, injeção de dependência, etc.)
+* Versionamento da API (rotas)
+* Documentação (exemplo: Swagger)
+* Respostas padronizadas (HTTP Status Codes)
+* Environments
+* DTOs
+* ViewModel
+* Entidades
+* ORM
+* Migrations
+* Testes de unidade

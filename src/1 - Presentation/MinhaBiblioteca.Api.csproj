@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\2 - Core\MinhaBiblioteca.Core.csproj" />
+    <ProjectReference Include="..\3 - Infra\MinhaBiblioteca.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>

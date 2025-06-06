@@ -6,9 +6,9 @@ public interface IAppResponse
     int CodigoDeStatus { get; set; }
     string? Mensagem { get; set; }
     object? Data { get; set; }
-    string? ErroInterno { get; set; }
-    string? RastreamentoDoErro { get; set; }
-    IEnumerable<string>? Erros { get; set; }
+    string? ExcessaoInterna { get; set; }
+    string? RastreamentoDePilha { get; set; }
+    IEnumerable<string> Erros { get; set; }
 
     Task<IAppResponse> Ok(object? data = null, string? mensagem = null);
 

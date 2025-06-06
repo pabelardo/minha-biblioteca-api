@@ -19,13 +19,13 @@ public class AppResponse : IAppResponse
     public object? Data { get; set; }
 
     [JsonPropertyName("erros")]
-    public IEnumerable<string>? Erros { get; set; }
+    public IEnumerable<string> Erros { get; set; }
 
     [JsonIgnore]
-    public string? ErroInterno { get; set; }
+    public string? ExcessaoInterna { get; set; }
 
     [JsonIgnore]
-    public string? RastreamentoDoErro { get; set; }
+    public string? RastreamentoDePilha { get; set; }
 
     public AppResponse()
     {
@@ -75,8 +75,8 @@ public class AppResponse : IAppResponse
         CodigoDeStatus = (int)StatusCodeEnum.InternalServerError;
         Data = string.Empty;
         Erros = [ ex.Message ];
-        ErroInterno = ex.InnerException != null ? ex.InnerException.Message : string.Empty;
-        RastreamentoDoErro = ex.StackTrace ?? string.Empty;
+        ExcessaoInterna = ex.InnerException != null ? ex.InnerException.Message : string.Empty;
+        RastreamentoDePilha = ex.StackTrace ?? string.Empty;
 
         return await Task.FromResult(this);
     }
@@ -95,8 +95,8 @@ public class AppResponse : IAppResponse
         Mensagem = mensagem ?? string.Empty;
         Erros = mensagensDeErro ?? [];
         Data = data ?? new { };
-        ErroInterno = erroInterno ?? string.Empty;
-        RastreamentoDoErro = rastreamentoDoErro ?? string.Empty;
+        ExcessaoInterna = erroInterno ?? string.Empty;
+        RastreamentoDePilha = rastreamentoDoErro ?? string.Empty;
 
         return await Task.FromResult(this);
     }

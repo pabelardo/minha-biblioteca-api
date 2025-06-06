@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace MinhaBiblioteca.Domain.Helpers;
+namespace MinhaBiblioteca.Domain.Utils;
 
 public static class ConfigurationHelper
 {

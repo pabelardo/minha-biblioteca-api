@@ -2,7 +2,7 @@
 
 public class Livro : Entity
 {
-    public required string Nome { get; set; }
+    public string Nome { get; set; }
     public Guid GeneroId { get; set; }
     public Guid AutorId { get; set; }
     public DateTime DataCadastro { get; set; }
@@ -10,8 +10,8 @@ public class Livro : Entity
 
     /* EF Relation */
 
-    public required Autor Autor { get; set; }
-    public required Genero Genero { get; set; }
+    public Autor Autor { get; set; }
+    public Genero Genero { get; set; }
 
     public Livro() { }
 

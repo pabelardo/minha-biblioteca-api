@@ -2,8 +2,8 @@
 using FluentValidation.Results;
 using Mapster;
 using MinhaBiblioteca.Application.DTOs;
-using MinhaBiblioteca.Application.Interfaces.Base;
 using MinhaBiblioteca.Application.Interfaces.Response;
+using MinhaBiblioteca.Application.Interfaces.Services;
 using MinhaBiblioteca.Application.Mappings;
 using MinhaBiblioteca.Domain.Entities;
 using MinhaBiblioteca.Domain.Exceptions;
@@ -12,9 +12,9 @@ using MinhaBiblioteca.Domain.Interfaces.Notificacoes;
 using MinhaBiblioteca.Domain.Interfaces.Repositories;
 using MinhaBiblioteca.Domain.Utils;
 
-namespace MinhaBiblioteca.Application.Services.Base;
+namespace MinhaBiblioteca.Application.Services;
 
-public abstract class BaseAppService<TEntity, TDto> : IBaseAppService<TDto>
+public class ServicoGenerico<TEntity, TDto> : IServicoGenerico<TEntity, TDto>
     where TEntity : Entity, new()
     where TDto : BaseDto<Guid>
 {
@@ -23,7 +23,7 @@ public abstract class BaseAppService<TEntity, TDto> : IBaseAppService<TDto>
     protected readonly IAppResponse _appResponse;
     private readonly IRepository<TEntity> _repository;
 
-    protected BaseAppService(
+    public ServicoGenerico(
         INotificador notificador,
         INotificacao notificacao,
         IAppResponse appResponse,
@@ -45,7 +45,7 @@ public abstract class BaseAppService<TEntity, TDto> : IBaseAppService<TDto>
 
     protected async Task<bool> DtoEstaValido(TDto dto)
     {
-        if(dto is null)
+        if (dto is null)
         {
             Notificar($"O objeto não pode ser nulo.");
             return false;
@@ -86,38 +86,12 @@ public abstract class BaseAppService<TEntity, TDto> : IBaseAppService<TDto>
 
             var entidadeInserida = await _repository.AdicionarAsync(entidade, true);
 
-            return await _appResponse.Ok(entidadeInserida.MapearParaDto<TEntity, TDto>());
+            return await _appResponse.Ok(entidadeInserida.MapearParaDto<TEntity, TDto>(), "Cadastro feito com sucesso.");
         }
         catch (Exception ex)
         {
             Notificar(ex.Message);
             return await _appResponse.BadRequest(mensagem: $"Ops :( ... Ocorreu um erro ao tentar cadastrar este registro.");
-        }
-    }
-
-    public async Task<IAppResponse> AtualizarAsync(Guid id, TDto dto)
-    {
-        if (id != dto.Id)
-        {
-            Notificar("O id passado na rota não possui o mesmo valor que a propriedade 'Id' do livro a ser atualizado.");
-            return await _appResponse.BadRequest(mensagem: $"Ops :( ... Ocorreu um erro ao tentar atualizar este registro.");
-        }
-
-        if (!await DtoEstaValido(dto))
-            return await _appResponse.BadRequest(mensagem: $"Ops :( ... Dados inválidos no cadastro.");
-
-        try
-        {
-            var entidade = dto.Adapt<TEntity>();
-
-            var livro = await _repository.AtualizarAsync(id, dto.MapearParaEntidade<TEntity, TDto>());
-
-            return await _appResponse.Ok(livro.MapearParaDto<TEntity, TDto>());
-        }
-        catch (Exception ex)
-        {
-            Notificar(ex.Message);
-            return await _appResponse.BadRequest(mensagem: $"Ops :( ... Ocorreu um erro ao tentar atualizar este registro.");
         }
     }
 
@@ -131,7 +105,7 @@ public abstract class BaseAppService<TEntity, TDto> : IBaseAppService<TDto>
 
         var entidade = await _repository.ObterPorIdAsync(id);
 
-        if(entidade is null)
+        if (entidade is null)
         {
             Notificar($"Não foi encontrado nenhum registro de ID [{id}].");
             return await _appResponse.NotFound(mensagem: $"Nenhum registro foi encontrado.");
@@ -147,28 +121,62 @@ public abstract class BaseAppService<TEntity, TDto> : IBaseAppService<TDto>
         return await _appResponse.Ok(entidades.MapearParaListaDto<TEntity, TDto>());
     }
 
-    public async Task RemoverAsync(Guid id)
+    public async Task<IAppResponse> AtualizarAsync(Guid id, TDto dto)
+    {
+        if (id != dto.Id)
+        {
+            Notificar("O id passado na rota não possui o mesmo valor que a propriedade 'Id' do livro a ser atualizado.");
+            return await _appResponse.BadRequest(mensagem: $"Ops :( ... Ocorreu um erro ao tentar atualizar este registro.");
+        }
+
+        if (!await DtoEstaValido(dto))
+            return await _appResponse.BadRequest(mensagem: $"Ops :( ... Dados inválidos no cadastro.");
+
+        try
+        {
+            if (!await _repository.ExisteAsync(id, true))
+            {
+                Notificar($"Não foi encontrado nenhum registro de ID [{id}] para atualização.");
+                return await _appResponse.NotFound(mensagem: "Nenhum registro foi encontrado.");
+            }
+
+            var entidade = dto.Adapt<TEntity>();
+
+            var entidadeAtualizada = await _repository.AtualizarAsync(id, dto.MapearParaEntidade<TEntity, TDto>());
+
+            return await _appResponse.Ok(entidadeAtualizada.MapearParaDto<TEntity, TDto>(), "Atualização feita com sucesso.");
+        }
+        catch (Exception ex)
+        {
+            Notificar(ex.Message);
+            return await _appResponse.BadRequest(mensagem: $"Ops :( ... Ocorreu um erro ao tentar atualizar este registro.");
+        }
+    }
+
+    public async Task<IAppResponse> ExcluirAsync(Guid id)
     {
         if (id == Guid.Empty)
         {
             Notificar("O id não pode ser nulo ou vazio.");
-            return;
+            return await _appResponse.BadRequest(mensagem: "Não foi possível excluir o registro. Fale com o admin do sistema.");
         }
 
         if (!await _repository.ExisteAsync(id, true))
         {
             Notificar($"Não foi encontrado nenhum registro de ID [{id}] para exclusão.");
-            return;
+            return await _appResponse.BadRequest(mensagem: "Não foi possível excluir o registro, pois o mesmo já foi excluído ou não existe.");
         }
 
         try
         {
             await _repository.RemoverAsync(id);
+
+            return await _appResponse.Ok(mensagem: "Registro excluído com sucesso.");
         }
         catch (Exception ex)
         {
             Notificar(ex.Message);
-            throw new RepositoryException($"Ops :( ... Ocorreu um erro ao tentar excluir esse registro.", ex);
+            return await _appResponse.BadRequest(mensagem: "Ops :( ... Ocorreu um erro ao tentar excluir esse registro.");
         }
     }
 }

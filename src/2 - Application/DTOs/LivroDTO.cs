@@ -1,13 +1,9 @@
-﻿using MinhaBiblioteca.Domain.Entities;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace MinhaBiblioteca.Application.DTOs;
 
-public class LivroDto
+public class LivroDto : BaseDto<Guid>
 {
-    [JsonPropertyName("id")]
-    public Guid Id { get; set; }
-
     [JsonPropertyName("nome")]
     public required string Nome { get; set; }
 
@@ -21,22 +17,8 @@ public class LivroDto
     public DateTime DataCadastro { get; set; }
 
     [JsonPropertyName("autor")]
-    public required AutorDTO Autor { get; set; }
+    public required AutorDto Autor { get; set; }
 
     [JsonPropertyName("genero")]
-    public required GeneroDTO Genero { get; set; }
-
-    public static implicit operator Livro(LivroDto dto)
-    {
-        return new Livro
-        {
-            Id = dto.Id,
-            Nome = dto.Nome,
-            GeneroId = dto.GeneroId,
-            AutorId = dto.AutorId,
-            DataCadastro = dto.DataCadastro,
-            Autor = dto.Autor,
-            Genero = dto.Genero
-        };
-    }
+    public required GeneroDto Genero { get; set; }
 }

@@ -3,11 +3,8 @@ using System.Text.Json.Serialization;
 
 namespace MinhaBiblioteca.Application.DTOs;
 
-public class GeneroDTO
+public class GeneroDto : BaseDto<Guid>
 {
-    [JsonPropertyName("id")]
-    public Guid Id { get; set; }
-
     [JsonPropertyName("nome")]
     public required string Nome { get; set; }
 

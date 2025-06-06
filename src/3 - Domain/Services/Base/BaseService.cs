@@ -1,6 +1,6 @@
 ﻿using FluentValidation.Results;
+using LanguageExt;
 using MinhaBiblioteca.Domain.Entities;
-using MinhaBiblioteca.Domain.Exceptions;
 using MinhaBiblioteca.Domain.Interfaces.Base;
 using MinhaBiblioteca.Domain.Interfaces.Notificacoes;
 using MinhaBiblioteca.Domain.Interfaces.Repositories;
@@ -31,64 +31,80 @@ public abstract class BaseService<TEntity> : IBaseService<TEntity> where TEntity
 
     protected void Notificar(string mensagem) => _notificador.Handle(_notificacao.CriarNotificacao(mensagem));
 
-    //protected async Task<bool> Validar<T>(T obj) where T : class
-    //{
-    //    try
-    //    {
-    //        Type genericType = typeof(IValidator<>).MakeGenericType(typeof(T));
+    public async Task AdicionarAsync(TEntity entity) => await _repository.AdicionarAsync(entity);
 
-    //        if (ConfigurationHelper.ObterServico(genericType) is not IValidator<T> validator)
-    //        {
-    //            Notificar("Validator não encontrado");
-    //            return false;
-    //        }
-
-    //        var validation = await validator.ObterValidationResult(obj);
-
-    //        if (validation.IsValid) return true;
-
-    //        Notificar(validation);
-
-    //        return false;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        throw new ValidacaoException(ex.Message);
-    //    }
-    //}
-
-    public Task AdicionarAsync(TEntity entity) => _repository.AdicionarAsync(entity);
-
-    public Task<TEntity> AdicionarAsync(TEntity entity, bool returnEntity = true) => _repository.AdicionarAsync(entity, returnEntity);
+    public async Task<Option<TEntity>> AdicionarAsync(TEntity entity, bool retornarEntidade = true)
+    {
+        try
+        {
+            return await _repository.AdicionarAsync(entity, retornarEntidade);
+        }
+        catch (Exception ex)
+        {
+            Notificar(ex.Message);
+            return Option<TEntity>.None;
+        }
+    }
 
     public Task<IEnumerable<TEntity>> ObterTodosAsync(bool semTrackear = false) => _repository.ObterTodosAsync(semTrackear);
 
-    public Task<TEntity?> ObterPorIdAsync(Guid id) => _repository.ObterPorIdAsync(id);
-
-    public async Task RemoverAsync(Guid id)
+    public async Task<Option<TEntity>> ObterPorIdAsync(Guid id)
     {
-        if(! await _repository.ExisteAsync(id, true))
+        try
         {
-            Notificar("O registro não pode ser excluído porque não foi encontrado.");
-            return;
-        }
+            var entity = await _repository.ObterPorIdAsync(id);
 
-        await _repository.RemoverAsync(id);
+            if (entity == null)
+                return Option<TEntity>.None;
+
+            return Option<TEntity>.Some(entity);
+        }
+        catch (Exception ex)
+        {
+            Notificar(ex.Message);
+            return Option<TEntity>.None;
+        }
     }
 
-    public Task<TEntity> AtualizarAsync(TEntity entity) => _repository.AtualizarAsync(entity);
-
-    public async Task<TEntity> AtualizarAsync(Guid id, TEntity entity)
+    public async Task<Option<bool>> RemoverAsync(Guid id)
     {
-        if (id != entity.Id)
-            throw new NotFoundException("O id passado na rota não possui o mesmo valor que a propriedade 'Id' do objeto a ser atualizado.");
-
-        if(!await _repository.ExisteAsync(id, true))
+        try
         {
-            Notificar("O registro não pode ser atualizado porque não foi encontrado.");
-            return entity;
-        }
+            if (!await _repository.ExisteAsync(id, true))
+            {
+                Notificar("O registro não pode ser excluído porque não foi encontrado.");
+                return Option<bool>.None;
+            }
 
-        return await _repository.AtualizarAsync(id, entity);
+            await _repository.RemoverAsync(id);
+
+            return Option<bool>.Some(true);
+        }
+        catch (Exception ex)
+        {
+            Notificar(ex.Message);
+            return Option<bool>.None;
+        }
+    }
+
+    public async Task<TEntity> AtualizarAsync(TEntity entity) => await _repository.AtualizarAsync(entity);
+
+    public async Task<Option<TEntity>> AtualizarAsync(Guid id, TEntity entity)
+    {
+        try
+        {
+            if (!await _repository.ExisteAsync(id, true))
+            {
+                Notificar("O registro não pode ser atualizado porque não foi encontrado.");
+                return Option<TEntity>.None;
+            }
+
+            return await _repository.AtualizarAsync(id, entity);
+        }
+        catch (Exception ex)
+        {
+            Notificar(ex.Message);
+            return Option<TEntity>.None;
+        }
     }
 }

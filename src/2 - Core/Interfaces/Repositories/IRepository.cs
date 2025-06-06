@@ -1,0 +1,17 @@
+﻿using MinhaBiblioteca.Core.Entities;
+
+namespace MinhaBiblioteca.Core.Interfaces.Repositories;
+
+public interface IRepository<TEntity> : IDisposable where TEntity : Entity
+{
+    Task AdicionarAsync(TEntity entity);
+    Task<TEntity> AdicionarAsync(TEntity entity, bool retornarEntidade = true);
+    Task<TEntity?> ObterPorIdAsync(Guid id);
+    Task<IEnumerable<TEntity>> ObterTodosAsync(bool semTrackear = false);
+    Task<TEntity> AtualizarAsync(TEntity entity);
+    Task<TEntity> AtualizarAsync(Guid id, TEntity entity);
+    Task RemoverAsync(Guid id);
+    //Task<bool> ExisteAsync(bool semTrackear = false);
+    Task<bool> ExisteAsync(Guid id, bool semTrackear = false);
+    Task<int> SalvarAlteracoesAsync();
+}

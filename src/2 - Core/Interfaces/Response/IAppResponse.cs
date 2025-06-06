@@ -1,4 +1,6 @@
-﻿namespace MinhaBiblioteca.Core.Interfaces.Response;
+﻿using MinhaBiblioteca.Core.ResponsePadronizado;
+
+namespace MinhaBiblioteca.Core.Interfaces.Response;
 
 public interface IAppResponse
 {
@@ -18,7 +20,7 @@ public interface IAppResponse
 
     Task<IAppResponse> InternalServerError(Exception ex, string? mensagem = null);
 
-    Task<IAppResponse> CriarResponseAsync(
+    Task<AppResponse> CriarResponseAsync(
         bool sucesso,
         int codigoDeStatus,
         string? mensagem = null,

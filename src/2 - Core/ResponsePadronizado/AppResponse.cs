@@ -81,7 +81,7 @@ public class AppResponse : IAppResponse
         return await Task.FromResult(this);
     }
 
-    public async Task<IAppResponse> CriarResponseAsync(
+    public async Task<AppResponse> CriarResponseAsync(
         bool sucesso,
         int codigoDeStatus,
         string? mensagem = null,

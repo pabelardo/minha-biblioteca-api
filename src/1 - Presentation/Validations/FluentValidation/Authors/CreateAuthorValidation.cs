@@ -3,9 +3,9 @@ using MinhaBiblioteca.Core.Requests.Authors;
 
 namespace MinhaBiblioteca.Api.Validations.FluentValidation.Authors;
 
-public class UpdateAuthorValidation : AbstractValidator<UpdateAuthorRequest>
+public class CreateAuthorValidation : AbstractValidator<CreateAuthorRequest>
 {
-    public UpdateAuthorValidation()
+    public CreateAuthorValidation()
     {
         RuleFor(f => f.Name)
             .NotEmpty()

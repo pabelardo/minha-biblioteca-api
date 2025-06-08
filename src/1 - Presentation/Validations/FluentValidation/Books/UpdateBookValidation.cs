@@ -7,6 +7,10 @@ public class UpdateBookValidation : AbstractValidator<UpdateBookRequest>
 {
     public UpdateBookValidation()
     {
+        RuleFor(c => c.Id)
+            .NotEmpty()
+            .WithMessage("O campo {PropertyName} é de preenchimento obrigatório");
+
         RuleFor(c => c.Name)
             .NotEmpty()
             .WithMessage("O campo {PropertyName} é de preenchimento obrigatório")

@@ -3,13 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2 - Core", "2 - Core", "{32F64EC6-B350-5BB0-5A13-864B0CED6328}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinhaBiblioteca.Core", "src\2 - Core\MinhaBiblioteca.Core.csproj", "{98A772F7-AB5F-4062-8C8D-BF7AE3D5FEFB}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 - Presentation", "1 - Presentation", "{F80BA338-0198-93D7-3033-8E5AAFB06510}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinhaBiblioteca.Api", "src\1 - Presentation\MinhaBiblioteca.Api.csproj", "{7137CCE7-B822-4E28-A7E7-63D3DC66616A}"
 EndProject
@@ -51,10 +45,7 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{32F64EC6-B350-5BB0-5A13-864B0CED6328} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
-		{98A772F7-AB5F-4062-8C8D-BF7AE3D5FEFB} = {32F64EC6-B350-5BB0-5A13-864B0CED6328}
-		{F80BA338-0198-93D7-3033-8E5AAFB06510} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
-		{7137CCE7-B822-4E28-A7E7-63D3DC66616A} = {F80BA338-0198-93D7-3033-8E5AAFB06510}
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8D21C056-F6DC-40CF-AB73-028331504F6D}
 	EndGlobalSection
 EndGlobal

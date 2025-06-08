@@ -1,12 +1,16 @@
 ﻿using FluentValidation;
 using MinhaBiblioteca.Core.Requests.Genres;
 
-namespace MinhaBiblioteca.Api.Validations.FluentValidation;
+namespace MinhaBiblioteca.Api.Validations.FluentValidation.Genres;
 
-public class CreateGenreValidation : AbstractValidator<CreateGenreRequest>
+public class UpdateGenreValidation : AbstractValidator<UpdateGenreRequest>
 {
-    public CreateGenreValidation()
+    public UpdateGenreValidation()
     {
+        RuleFor(c => c.Id)
+            .NotEmpty()
+            .WithMessage("O campo {PropertyName} é de preenchimento obrigatório");
+
         RuleFor(c => c.Name)
             .NotEmpty()
             .WithMessage("O campo {PropertyName} é de preenchimento obrigatório")
@@ -14,7 +18,7 @@ public class CreateGenreValidation : AbstractValidator<CreateGenreRequest>
             .WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres");
 
         RuleFor(c => c.Description)
-            .Length(2, 255)
+            .Length(2, 500)
             .WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres");
     }
 }

@@ -3,10 +3,14 @@ using MinhaBiblioteca.Core.Requests.Authors;
 
 namespace MinhaBiblioteca.Api.Validations.FluentValidation.Authors;
 
-public class AutorValidation : AbstractValidator<CreateAuthorRequest>
+public class UpdateAuthorValidation : AbstractValidator<UpdateAuthorRequest>
 {
-    public AutorValidation()
+    public UpdateAuthorValidation()
     {
+        RuleFor(f => f.Id)
+            .NotEmpty()
+            .WithMessage("O campo {PropertyName} é de preenchimento obrigatório");
+
         RuleFor(f => f.Name)
             .NotEmpty()
             .WithMessage("O campo {PropertyName} é de preenchimento obrigatório")

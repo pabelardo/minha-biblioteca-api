@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
 using MinhaBiblioteca.Core.Requests.Genres;
 
-namespace MinhaBiblioteca.Api.Validations.FluentValidation.Genres;
+namespace MinhaBiblioteca.Api.Validations.FluentValidation;
 
-public class UpdateGenreValidation : AbstractValidator<UpdateGenreRequest>
+public class CreateGenreValidation : AbstractValidator<CreateGenreRequest>
 {
-    public UpdateGenreValidation()
+    public CreateGenreValidation()
     {
         RuleFor(c => c.Name)
             .NotEmpty()
@@ -14,7 +14,7 @@ public class UpdateGenreValidation : AbstractValidator<UpdateGenreRequest>
             .WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres");
 
         RuleFor(c => c.Description)
-            .Length(2, 255)
+            .Length(2, 500)
             .WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres");
     }
 }

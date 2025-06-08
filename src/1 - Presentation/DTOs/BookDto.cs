@@ -8,6 +8,6 @@ public class BookDto
     public Guid AuthorId { get; set; }
     public Guid GenreId { get; set; }
 
-    public AuthorDto Author { get; set; } = null!;
-    public GenreDto Genre { get; set; } = null!;
+    public AuthorDto? Author { get; set; }
+    public GenreDto? Genre { get; set; }
 }

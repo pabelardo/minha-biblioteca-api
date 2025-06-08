@@ -5,9 +5,10 @@ namespace MinhaBiblioteca.Core.Responses;
 
 public class Response<TData>
 {
-    private readonly int _code;
+    [JsonIgnore]
+    public readonly int StatusCode;
 
-    public bool Success => _code is >= 200 and <= 299;
+    public bool Success => StatusCode is >= 200 and <= 299;
 
     public string? Message { get; set; }
 
@@ -16,7 +17,7 @@ public class Response<TData>
     public IEnumerable<string>? Errors { get; set; }
 
     [JsonConstructor]
-    public Response() => _code = Configuration.DefaultStatusCode;
+    public Response() => StatusCode = Configuration.DefaultStatusCode;
 
     public Response(
         TData? data,
@@ -25,8 +26,8 @@ public class Response<TData>
         IEnumerable<string>? errors = null)
     {
         Data = data;
-        Message = message;
-        _code = code;
-        Errors = errors;
+        Message = message ?? string.Empty;
+        StatusCode = code;
+        Errors = errors ?? [];
     }
 }

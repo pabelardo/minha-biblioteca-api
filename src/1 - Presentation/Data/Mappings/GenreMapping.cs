@@ -18,7 +18,7 @@ public class GenreMapping : IEntityTypeConfiguration<Genre>
 
         builder.Property(g => g.Description)
             .IsRequired(false)
-            .HasColumnType("nvarchar(255)");
+            .HasColumnType("nvarchar(500)");
 
         builder.Property(l => l.CreatedAt)
             .IsRequired(true);

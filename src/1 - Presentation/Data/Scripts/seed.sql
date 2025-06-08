@@ -1,0 +1,2 @@
+INSERT INTO [dbo].[Books] (Title, Description, UserId) VALUES ('Alimentação', 'Despesas com alimentos e bebidas', 'teste@balta.io');
+INSERT INTO [dbo].[Books] (Title, Description, UserId) VALUES ('Saúde', 'Gastos com saúde e bem-estar', 'teste@balta.io');

@@ -83,6 +83,28 @@ public abstract class Repository<TEntity>(AppDbContext db) : IRepository<TEntity
         }
     }
 
+    public virtual async Task<IEnumerable<TEntity>> GetByFilterAsync(
+        Expression<Func<TEntity, bool>>? predicate = null,
+        params Expression<Func<TEntity, object>>[] includes)
+    {
+        IQueryable<TEntity> query = DbSet;
+
+        if (includes != null)
+        {
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+        }
+
+        if (predicate != null)
+        {
+            query = query.Where(predicate);
+        }
+
+        return await query.ToListAsync();
+    }
+
     public virtual async Task<TEntity> UpdateAsync(TEntity entity)
     {
         try
@@ -120,6 +142,18 @@ public abstract class Repository<TEntity>(AppDbContext db) : IRepository<TEntity
         catch (DbException ex)
         {
             throw new RepositoryException(string.Format(ERRO_CONCORRENCIA_EXCLUIR, ex.Message), ex);
+        }
+        catch (Exception ex)
+        {
+            throw new RepositoryException(string.Format(ERRO_GENERICO, ex.Message), ex);
+        }
+    }
+
+    public virtual async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate)
+    {
+        try
+        {
+            return await DbSet.AsNoTrackingWithIdentityResolution().AnyAsync(predicate);
         }
         catch (Exception ex)
         {

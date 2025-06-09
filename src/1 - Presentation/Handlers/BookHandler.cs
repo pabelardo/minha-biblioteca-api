@@ -63,7 +63,7 @@ public class BookHandler(
 
         try
         {
-            var query = await repository.GetQueryable();
+            var query = await repository.GetQueryable(true);
 
             var books = await query
                              .OrderBy(b => b.Name)

@@ -5,13 +5,14 @@ using MinhaBiblioteca.Api.Common.Mappings;
 using MinhaBiblioteca.Api.DTOs;
 using MinhaBiblioteca.Api.Handlers.Interfaces;
 using MinhaBiblioteca.Core.Enums;
+using MinhaBiblioteca.Core.Models;
 using MinhaBiblioteca.Core.Repositories;
 using MinhaBiblioteca.Core.Requests.Authors;
 using MinhaBiblioteca.Core.Responses;
 
 namespace MinhaBiblioteca.Api.Handlers;
 
-public class AuthorHandler(IAuthorRepository repository, ILogger<BookHandler> logger) : IAuthorHandler
+public class AuthorHandler(IAuthorRepository repository, ILogger<AuthorHandler> logger) : IAuthorHandler
 {
     public async Task<Response<AuthorDto?>> CreateAsync(CreateAuthorRequest request)
     {
@@ -44,13 +45,12 @@ public class AuthorHandler(IAuthorRepository repository, ILogger<BookHandler> lo
     {
         try
         {
-            var query = await repository.GetQueryable();
+            var query = await repository.GetQueryable(true);
 
-            var authors = await query
-                             .OrderBy(a => a.Name)
-                             .Skip((request.PageNumber - 1) * request.PageSize)
-                             .Take(request.PageSize)
-                             .ToListAsync();
+            var authors = await query.OrderBy(a => a.Name)
+                                     .Skip((request.PageNumber - 1) * request.PageSize)
+                                     .Take(request.PageSize)
+                                     .ToListAsync();
 
             var count = await query.CountAsync();
 

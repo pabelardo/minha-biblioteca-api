@@ -10,7 +10,7 @@ namespace MinhaBiblioteca.Api.Data.Repositories;
 
 public abstract class Repository<TEntity>(AppDbContext db) : IRepository<TEntity> where TEntity : Entity, new()
 {
-    protected readonly AppDbContext Db = db;
+    protected readonly AppDbContext DbContext = db;
     protected readonly DbSet<TEntity> DbSet = db.Set<TEntity>();
     protected const string ERRO_INSERCAO = "Ocorreu um erro ao tentar inserir entidade na base de dados. Detalhes: [{0}]";
     protected const string ERRO_ATUALIZACAO = "Ocorreu um erro ao tentar atualizar a entidade na base de dados. Detalhes: [{0}]";
@@ -26,7 +26,7 @@ public abstract class Repository<TEntity>(AppDbContext db) : IRepository<TEntity
         {
             var result = await DbSet.AddAsync(entity);
 
-            await SaveChangesAsync();
+            await SaveChanges();
 
             return result.Entity;
         }
@@ -75,7 +75,10 @@ public abstract class Repository<TEntity>(AppDbContext db) : IRepository<TEntity
     {
         try
         {
-            return Task.FromResult(DbSet.AsNoTrackingWithIdentityResolution());
+            if(noTracking)
+                return Task.FromResult(DbSet.AsNoTrackingWithIdentityResolution());
+
+            return Task.FromResult(DbSet.AsQueryable());
         }
         catch (Exception ex)
         {
@@ -110,7 +113,7 @@ public abstract class Repository<TEntity>(AppDbContext db) : IRepository<TEntity
         try
         {
             var result = DbSet.Update(entity);
-            await SaveChangesAsync();
+            await SaveChanges();
             return result.Entity;
         }
         catch (DbUpdateException ex)
@@ -133,7 +136,7 @@ public abstract class Repository<TEntity>(AppDbContext db) : IRepository<TEntity
         {
             DbSet.Remove(entity);
 
-            await SaveChangesAsync();
+            await SaveChanges();
         }
         catch (DbUpdateException ex)
         {
@@ -161,7 +164,7 @@ public abstract class Repository<TEntity>(AppDbContext db) : IRepository<TEntity
         }
     }
 
-    public virtual Task<int> SaveChangesAsync() => Db.SaveChangesAsync();
+    public virtual Task<int> SaveChanges() => DbContext.SaveChangesAsync();
 
-    public virtual void Dispose() => GC.SuppressFinalize(this);
+    public virtual void Dispose() { }
 }

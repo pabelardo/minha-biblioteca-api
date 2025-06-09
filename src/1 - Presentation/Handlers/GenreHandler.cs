@@ -39,7 +39,7 @@ public class GenreHandler(IGenreRepository repository) : IGenreHandler
     {
         try
         {
-            var query = await repository.GetQueryable();
+            var query = await repository.GetQueryable(true);
 
             var genres = await query
                              .OrderBy(g => g.Name)

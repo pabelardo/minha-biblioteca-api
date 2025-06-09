@@ -15,5 +15,5 @@ public interface IRepository<TEntity> : IDisposable where TEntity : Entity
     Task RemoveAsync(TEntity entity);
     Task<IQueryable<TEntity>> GetQueryable(bool noTracking = false);
     Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate);
-    Task<int> SaveChangesAsync();
+    Task<int> SaveChanges();
 }

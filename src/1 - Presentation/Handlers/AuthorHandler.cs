@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation.Results;
+using Microsoft.EntityFrameworkCore;
 using MinhaBiblioteca.Api.Common.Extensions;
 using MinhaBiblioteca.Api.Common.Mappings;
 using MinhaBiblioteca.Api.DTOs;
@@ -10,7 +11,7 @@ using MinhaBiblioteca.Core.Responses;
 
 namespace MinhaBiblioteca.Api.Handlers;
 
-public class AuthorHandler(IAuthorRepository repository) : IAuthorHandler
+public class AuthorHandler(IAuthorRepository repository, ILogger<BookHandler> logger) : IAuthorHandler
 {
     public async Task<Response<AuthorDto?>> CreateAsync(CreateAuthorRequest request)
     {
@@ -18,20 +19,24 @@ public class AuthorHandler(IAuthorRepository repository) : IAuthorHandler
         {
             var validationResult = await request.GetValidationResult();
 
-            if (!validationResult.IsValid)
-                return new Response<AuthorDto?>(
-                    null,
-                    (int)StatusCodeEnum.BadRequest,
-                    "Não foi possível criar o autor",
-                    validationResult.Errors.Select(e => e.ErrorMessage));
+            if (!await IsValidRequest(request, validationResult))
+                return new Response<AuthorDto?>(null,
+                                               (int)StatusCodeEnum.BadRequest,
+                                               "Não foi possível criar o(a) autor(a)",
+                                               validationResult.Errors.Select(e => e.ErrorMessage));
+
+            if(await AuthorAlreadyExists(request))
+                return new Response<AuthorDto?>(null,
+                                               (int)StatusCodeEnum.BadRequest,
+                                               "Já existe um(a) autor(a) com o mesmo nome");
 
             var author = await repository.AddAsync(request.ToEntity());
 
-            return new Response<AuthorDto?>(author.ToDto(), (int)StatusCodeEnum.Created, "Autor criado com sucesso !");
+            return new Response<AuthorDto?>(author.ToDto(), (int)StatusCodeEnum.Created, "Autor(a) criado com sucesso !");
         }
-        catch (Exception)
+        catch
         {
-            return new Response<AuthorDto?>(null, (int)StatusCodeEnum.InternalServerError, "Não foi possível criar o autor");
+            return new Response<AuthorDto?>(null, (int)StatusCodeEnum.InternalServerError, "Não foi possível criar o(a) autor(a)");
         }
     }
 
@@ -57,7 +62,7 @@ public class AuthorHandler(IAuthorRepository repository) : IAuthorHandler
         }
         catch
         {
-            return new Response<IEnumerable<AuthorDto?>>(null, (int)StatusCodeEnum.InternalServerError, "Não foi possível obter os autores");
+            return new Response<IEnumerable<AuthorDto?>>(null, (int)StatusCodeEnum.InternalServerError, "Não foi possível obter o(a)s autore(a)s");
         }
     }
 
@@ -71,9 +76,9 @@ public class AuthorHandler(IAuthorRepository repository) : IAuthorHandler
                 ? new Response<AuthorDto?>(null, (int)StatusCodeEnum.NotFound, "Autor não encontrado !")
                 : new Response<AuthorDto?>(author.ToDto());
         }
-        catch(Exception ex)
+        catch
         {
-            return new Response<AuthorDto?>(null, (int)StatusCodeEnum.InternalServerError, "Não foi possível obter o autor");
+            return new Response<AuthorDto?>(null, (int)StatusCodeEnum.InternalServerError, "Não foi possível obter o(a) autor(a)");
         }
     }
 
@@ -82,12 +87,7 @@ public class AuthorHandler(IAuthorRepository repository) : IAuthorHandler
         try
         {
             if(request.Id != id)
-                return new Response<AuthorDto?>(null, (int)StatusCodeEnum.BadRequest, "O ID do autor não corresponde ao ID fornecido na URL.");
-
-            var author = await repository.GetByIdAsync(request.Id);
-
-            if (author is null)
-                return new Response<AuthorDto?>(null, (int)StatusCodeEnum.NotFound, "Autor não encontrado !");
+                return new Response<AuthorDto?>(null, (int)StatusCodeEnum.BadRequest, "O ID do(a) autor(a) não corresponde ao ID fornecido na URL.");
 
             var validationResult = await request.GetValidationResult();
 
@@ -98,13 +98,20 @@ public class AuthorHandler(IAuthorRepository repository) : IAuthorHandler
                     "Não foi possível atualizar o autor",
                     validationResult.Errors.Select(e => e.ErrorMessage));
 
-            var authorUpdated = await repository.UpdateAsync(request.ToEntity());
+            var author = await repository.GetByIdAsync(request.Id);
 
-            return new Response<AuthorDto?>(authorUpdated.ToDto(), message: "Autor atualizado com sucesso !");
+            if (author is null)
+                return new Response<AuthorDto?>(null, (int)StatusCodeEnum.NotFound, "Autor(a) não encontrado(a) !");
+
+            author.ChangeEntityProperties(request);
+
+            var authorUpdated = await repository.UpdateAsync(author);
+
+            return new Response<AuthorDto?>(authorUpdated.ToDto(), message: "Autor(a) atualizado(a) com sucesso !");
         }
         catch
         {
-            return new Response<AuthorDto?>(null, (int)StatusCodeEnum.InternalServerError, "Não foi possível atualizar o Autor");
+            return new Response<AuthorDto?>(null, (int)StatusCodeEnum.InternalServerError, "Não foi possível atualizar o(a) Autor(a)");
         }
     }
 
@@ -117,13 +124,44 @@ public class AuthorHandler(IAuthorRepository repository) : IAuthorHandler
             if (author is null)
                 return new Response<AuthorDto?>(null, (int)StatusCodeEnum.NotFound, "Autor não encontrado !");
 
-            await repository.RemoveAsync(request.Id);
+            if (await repository.ExistsAsync(g => g.Books.Any(b => b.AuthorId == author.Id)))
+                return new Response<AuthorDto?>(null, (int)StatusCodeEnum.BadRequest, $"Não é possível excluir o autor [{author.Name}], pois existem livros associados ao mesmo.");
+
+            await repository.RemoveAsync(author);
 
             return new Response<AuthorDto?>(author.ToDto(), message: "Autor excluído com sucesso !");
         }
         catch
         {
-            return new Response<AuthorDto?>(null, (int)StatusCodeEnum.InternalServerError, "Não foi possível excluir o Autor");
+            return new Response<AuthorDto?>(null, (int)StatusCodeEnum.InternalServerError, "Não foi possível excluir o(a) Autor(a)");
         }
+    }
+
+    private async Task<bool> IsValidRequest(CreateAuthorRequest request, ValidationResult validationResult)
+    {
+        logger.LogInformation("Iniciando validação do autor: {Name}", request.Name);
+
+        if (!validationResult.IsValid)
+        {
+            logger.LogWarning("Validação falhou. Erros: {Errors}", validationResult.Errors);
+
+            return await Task.FromResult(false);
+        }
+
+        logger.LogInformation("Válido.");
+
+        return await Task.FromResult(true);
+    }
+
+    private async Task<bool> AuthorAlreadyExists(CreateAuthorRequest request)
+    {
+        logger.LogInformation("Verificando se o autor já existe: {Name}", request.Name);
+
+        var exists = await repository.ExistsAsync(a => a.Name == request.Name);
+
+        if (exists)
+            logger.LogWarning("O autor já existe na base.");
+
+        return exists;
     }
 }

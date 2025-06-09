@@ -84,11 +84,6 @@ public class GenreHandler(IGenreRepository repository) : IGenreHandler
             if (id != request.Id)
                 return new Response<GenreDto?>(null, (int)StatusCodeEnum.BadRequest, "O ID do gênero não corresponde ao ID fornecido na URL.");
 
-            var genres = await repository.GetByIdAsync(request.Id);
-
-            if (genres is null)
-                return new Response<GenreDto?>(null, (int)StatusCodeEnum.NotFound, "Gênero não encontrado !");
-
             var validationResult = await request.GetValidationResult();
 
             if (!validationResult.IsValid)
@@ -98,7 +93,14 @@ public class GenreHandler(IGenreRepository repository) : IGenreHandler
                     "Não foi possível atualizar o gênero",
                     validationResult.Errors.Select(e => e.ErrorMessage));
 
-            var authorUpdated = await repository.UpdateAsync(request.ToEntity());
+            var genres = await repository.GetByIdAsync(request.Id);
+
+            if (genres is null)
+                return new Response<GenreDto?>(null, (int)StatusCodeEnum.NotFound, "Gênero não encontrado !");
+
+            genres.ChangeEntityProperties(request);
+
+            var authorUpdated = await repository.UpdateAsync(genres);
 
             return new Response<GenreDto?>(authorUpdated.ToDto(), message: "Gênero atualizado com sucesso !");
         }
@@ -117,7 +119,10 @@ public class GenreHandler(IGenreRepository repository) : IGenreHandler
             if (genre is null)
                 return new Response<GenreDto?>(null, (int)StatusCodeEnum.NotFound, "Gênero não encontrado !");
 
-            await repository.RemoveAsync(request.Id);
+            if(await repository.ExistsAsync(g => g.Books.Any(b => b.GenreId == genre.Id)))
+                return new Response<GenreDto?>(null, (int)StatusCodeEnum.BadRequest, $"Não é possível excluir o gênero [{genre.Name}], pois existem livros associados ao mesmo.");
+
+            await repository.RemoveAsync(genre);
 
             return new Response<GenreDto?>(genre.ToDto(), message: "Gênero excluído com sucesso !");
         }

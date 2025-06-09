@@ -12,13 +12,13 @@ public abstract class Repository<TEntity>(AppDbContext db) : IRepository<TEntity
 {
     protected readonly AppDbContext Db = db;
     protected readonly DbSet<TEntity> DbSet = db.Set<TEntity>();
-    private const string ERRO_INSERCAO = "Ocorreu um erro ao tentar inserir entidade na base de dados. Detalhes: [{0}]";
-    private const string ERRO_ATUALIZACAO = "Ocorreu um erro ao tentar atualizar a entidade na base de dados. Detalhes: [{0}]";
-    private const string ERRO_EXCLUSAO = "Ocorreu um erro ao tentar excluir a entidade na base de dados. Detalhes: [{0}]";
-    private const string ERRO_CONCORRENCIA_INSERIR = "Ocorreu um erro de concorrência ao tentar inserir entidade na base de dados. Detalhes: [{0}]";
-    private const string ERRO_CONCORRENCIA_ATUALIZAR = "Ocorreu um erro de concorrência ao tentar atualizar entidade na base de dados. Detalhes: [{0}]";
-    private const string ERRO_CONCORRENCIA_EXCLUIR = "Ocorreu um erro de concorrência ao tentar excluir entidade na base de dados. Detalhes: [{0}]";
-    private const string ERRO_GENERICO = "Ocorreu um erro. Detalhes: [{0}]";
+    protected const string ERRO_INSERCAO = "Ocorreu um erro ao tentar inserir entidade na base de dados. Detalhes: [{0}]";
+    protected const string ERRO_ATUALIZACAO = "Ocorreu um erro ao tentar atualizar a entidade na base de dados. Detalhes: [{0}]";
+    protected const string ERRO_EXCLUSAO = "Ocorreu um erro ao tentar excluir a entidade na base de dados. Detalhes: [{0}]";
+    protected const string ERRO_CONCORRENCIA_INSERIR = "Ocorreu um erro de concorrência ao tentar inserir entidade na base de dados. Detalhes: [{0}]";
+    protected const string ERRO_CONCORRENCIA_ATUALIZAR = "Ocorreu um erro de concorrência ao tentar atualizar entidade na base de dados. Detalhes: [{0}]";
+    protected const string ERRO_CONCORRENCIA_EXCLUIR = "Ocorreu um erro de concorrência ao tentar excluir entidade na base de dados. Detalhes: [{0}]";
+    protected const string ERRO_GENERICO = "Ocorreu um erro. Detalhes: [{0}]";
 
     public virtual async Task<TEntity> AddAsync(TEntity entity)
     {
@@ -127,11 +127,11 @@ public abstract class Repository<TEntity>(AppDbContext db) : IRepository<TEntity
         }
     }
 
-    public virtual async Task RemoveAsync(Guid id)
+    public virtual async Task RemoveAsync(TEntity entity)
     {
         try
         {
-            DbSet.Remove(new TEntity { Id = id });
+            DbSet.Remove(entity);
 
             await SaveChangesAsync();
         }

@@ -7,19 +7,22 @@ public class CreateAuthorValidation : AbstractValidator<CreateAuthorRequest>
 {
     public CreateAuthorValidation()
     {
-        RuleFor(f => f.Name)
+        RuleFor(a => a.Name)
             .NotEmpty()
             .WithMessage("O campo {PropertyName} é de preenchimento obrigatório")
             .Length(2, 100)
             .WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres");
 
-        RuleFor(f => f.Email)
+        RuleFor(a => a.Email)
             .Length(2, 100)
             .WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres")
-            .EmailAddress();
+            .EmailAddress()
+            .WithMessage("O campo {PropertyName} precisa ser um endereço de e-mail válido")
+            .When(a => !string.IsNullOrWhiteSpace(a.Email));
 
-        RuleFor(f => f.Phone)
-            .Length(2, 100)
-            .WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres");
+        RuleFor(a => a.Phone)
+            .Length(2, 15)
+            .WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres")
+            .When(a => !string.IsNullOrWhiteSpace(a.Phone));
     }
 }

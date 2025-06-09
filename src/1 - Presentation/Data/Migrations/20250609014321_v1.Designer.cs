@@ -12,8 +12,8 @@ using MinhaBiblioteca.Api.Data.Context;
 namespace MinhaBiblioteca.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250607015142_v2")]
-    partial class v2
+    [Migration("20250609014321_v1")]
+    partial class v1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -42,7 +42,7 @@ namespace MinhaBiblioteca.Api.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("varchar(13)");
+                        .HasColumnType("varchar(25)");
 
                     b.HasKey("Id");
 
@@ -87,7 +87,7 @@ namespace MinhaBiblioteca.Api.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Name")
                         .IsRequired()

@@ -22,7 +22,7 @@ public class AuthorMapping : IEntityTypeConfiguration<Author>
 
         builder.Property(a => a.Phone)
             .IsRequired(false)
-            .HasColumnType("varchar(13)");
+            .HasColumnType("varchar(25)");
 
         builder.Property(l => l.CreatedAt)
             .IsRequired();

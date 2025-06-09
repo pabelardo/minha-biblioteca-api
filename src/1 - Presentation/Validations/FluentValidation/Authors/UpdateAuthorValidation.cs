@@ -18,16 +18,14 @@ public class UpdateAuthorValidation : AbstractValidator<UpdateAuthorRequest>
             .WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres");
 
         RuleFor(f => f.Email)
-            .NotEmpty()
-            .WithMessage("O campo {PropertyName} é de preenchimento obrigatório")
             .Length(2, 100)
             .WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres")
-            .EmailAddress();
+            .EmailAddress()
+            .When(a => !string.IsNullOrWhiteSpace(a.Email));
 
         RuleFor(f => f.Phone)
-            .NotEmpty()
-            .WithMessage("O campo {PropertyName} é de preenchimento obrigatório")
             .Length(2, 100)
-            .WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres");
+            .WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres")
+            .When(a => !string.IsNullOrWhiteSpace(a.Phone));
     }
 }

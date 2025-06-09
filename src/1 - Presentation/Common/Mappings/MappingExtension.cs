@@ -1,4 +1,5 @@
 ﻿using MinhaBiblioteca.Api.DTOs;
+using MinhaBiblioteca.Core.Common.Extensions;
 using MinhaBiblioteca.Core.Models;
 using MinhaBiblioteca.Core.Requests.Authors;
 using MinhaBiblioteca.Core.Requests.Books;
@@ -23,6 +24,8 @@ public static class MappingExtension
     {
         Id = author.Id,
         Name = author.Name,
+        Email = author.Email ?? string.Empty,
+        Phone = author.Phone ?? string.Empty,
         CreatedAt = author.CreatedAt,
         Books = author.Books.Select(b => b.ToDto()).ToList()
     };
@@ -51,11 +54,19 @@ public static class MappingExtension
         GenreId = request.GenreId
     };
 
+    public static void ChangeEntityProperties(this Book book, UpdateBookRequest request)
+    {
+        book.Id = request.Id;
+        book.Name = request.Name;
+        book.AuthorId = request.AuthorId;
+        book.GenreId = request.GenreId;
+    }
+
     public static Author ToEntity(this CreateAuthorRequest request) => new()
     {
         Name = request.Name,
         Email = request.Email,
-        Phone = request.Phone
+        Phone = request.Phone.GetDigits()
     };
 
     public static Author ToEntity(this UpdateAuthorRequest request) => new()
@@ -63,8 +74,16 @@ public static class MappingExtension
         Id = request.Id,
         Name = request.Name,
         Email = request.Email,
-        Phone = request.Phone
+        Phone = request.Phone?.GetDigits()
     };
+
+    public static void ChangeEntityProperties(this Author author, UpdateAuthorRequest request)
+    {
+        author.Id = request.Id;
+        author.Name = request.Name;
+        author.Email = request.Email;
+        author.Phone = request.Phone?.GetDigits() ?? string.Empty;
+    }
 
     public static Genre ToEntity(this CreateGenreRequest request) => new()
     {
@@ -78,6 +97,13 @@ public static class MappingExtension
         Name = request.Name,
         Description = request.Description
     };
+
+    public static void ChangeEntityProperties(this Genre genre, UpdateGenreRequest request)
+    {
+        genre.Id = request.Id;
+        genre.Name = request.Name;
+        genre.Description = request.Description;
+    }
 
     public static List<AuthorDto> ToList(this IEnumerable<Author> authors) => 
         authors.Select(a => a.ToDto()).ToList();

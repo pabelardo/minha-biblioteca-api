@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinhaBiblioteca.Core", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinhaBiblioteca.Api", "src\1 - Presentation\MinhaBiblioteca.Api.csproj", "{7137CCE7-B822-4E28-A7E7-63D3DC66616A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinhaBiblioteca.Tests", "tests\MinhaBiblioteca.Tests.csproj", "{DFA70128-78A1-48A1-B969-6C358D974EA2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,18 @@ Global
 		{7137CCE7-B822-4E28-A7E7-63D3DC66616A}.Release|x64.Build.0 = Release|Any CPU
 		{7137CCE7-B822-4E28-A7E7-63D3DC66616A}.Release|x86.ActiveCfg = Release|Any CPU
 		{7137CCE7-B822-4E28-A7E7-63D3DC66616A}.Release|x86.Build.0 = Release|Any CPU
+		{DFA70128-78A1-48A1-B969-6C358D974EA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFA70128-78A1-48A1-B969-6C358D974EA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFA70128-78A1-48A1-B969-6C358D974EA2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DFA70128-78A1-48A1-B969-6C358D974EA2}.Debug|x64.Build.0 = Debug|Any CPU
+		{DFA70128-78A1-48A1-B969-6C358D974EA2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DFA70128-78A1-48A1-B969-6C358D974EA2}.Debug|x86.Build.0 = Debug|Any CPU
+		{DFA70128-78A1-48A1-B969-6C358D974EA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFA70128-78A1-48A1-B969-6C358D974EA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFA70128-78A1-48A1-B969-6C358D974EA2}.Release|x64.ActiveCfg = Release|Any CPU
+		{DFA70128-78A1-48A1-B969-6C358D974EA2}.Release|x64.Build.0 = Release|Any CPU
+		{DFA70128-78A1-48A1-B969-6C358D974EA2}.Release|x86.ActiveCfg = Release|Any CPU
+		{DFA70128-78A1-48A1-B969-6C358D974EA2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

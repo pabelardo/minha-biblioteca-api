@@ -19,6 +19,7 @@ public class UpdateGenreValidation : AbstractValidator<UpdateGenreRequest>
 
         RuleFor(c => c.Description)
             .Length(2, 500)
-            .WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres");
+            .WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres")
+            .When(g => !string.IsNullOrWhiteSpace(g.Description));
     }
 }

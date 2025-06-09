@@ -39,7 +39,7 @@ namespace MinhaBiblioteca.Api.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("varchar(13)");
+                        .HasColumnType("varchar(25)");
 
                     b.HasKey("Id");
 

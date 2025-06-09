@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation.Results;
+using Microsoft.EntityFrameworkCore;
 using MinhaBiblioteca.Api.Common.Extensions;
 using MinhaBiblioteca.Api.Common.Mappings;
 using MinhaBiblioteca.Api.DTOs;
@@ -24,33 +25,21 @@ public class BookHandler(
         {
             var validationResult = await request.GetValidationResult();
 
-            if (!validationResult.IsValid)
-            {
-                logger.LogWarning("O livro [{Name}] não passou na validação. Verifique os erros: {Errors}",
-                                  request.Name,
-                                  validationResult.Errors.Select(e => e.ErrorMessage));
-
+            if (!await IsValidRequest(validationResult))
                 return new Response<BookDto?>(null,
-                                           (int)StatusCodeEnum.BadRequest,
-                                           "Não foi possível criar o livro",
-                                           validationResult.Errors.Select(e => e.ErrorMessage));
-            }
+                                             (int)StatusCodeEnum.BadRequest,
+                                             "Não foi possível criar o livro",
+                                             validationResult.Errors.Select(e => e.ErrorMessage));
 
-            if(!await authorRepository.ExistsAsync(a => a.Id == request.AuthorId) && !await genreRepository.ExistsAsync(g => g.Id == request.GenreId))
-            {
-                logger.LogWarning("O autor de ID [{AuthorId}] ou o gênero de ID [{GenreId}] não existem na base de dados.", request.AuthorId, request.GenreId);
+            if(await NotExistsAuthorAndGenre(request))
+                return new Response<BookDto?>(null,
+                                             (int)StatusCodeEnum.BadRequest,
+                                             "Autor e gênero não foram encontrados na base");
 
-                return new Response<BookDto?>(null, (int)StatusCodeEnum.BadRequest, "Autor ou gênero não encontrado na base");
-            }
-
-            // Verificar se já existe um livro com o mesmo gênero e autor
-            //ToDo
-
-            if (await repository.ExistsAsync(b => b.AuthorId == request.AuthorId && b.GenreId == request.GenreId))
-            {
-                logger.LogWarning("Já existe um livro com o autor de ID [{AuthorId}] e gênero de ID [{GenreId}].", request.AuthorId, request.GenreId);
-                return new Response<BookDto?>(null, (int)StatusCodeEnum.BadRequest, "Já existe um livro com o mesmo autor e gênero");
-            }
+            if(await ExistsBookWithAuthorAndGenre(request))
+                return new Response<BookDto?>(null,
+                                             (int)StatusCodeEnum.BadRequest,
+                                             "Já existe um livro com o mesmo autor e gênero");
 
             var book = await repository.AddAsync(request.ToEntity());
 
@@ -129,11 +118,17 @@ public class BookHandler(
 
         try
         {
-            if (id != request.Id)
-            {
-                logger.LogWarning("O ID do livro na requisição [{Id}] não corresponde ao ID do livro a ser atualizado [{Id}.", request.Id, id);
+            if(await IsRequestIdNotEqualToUrlId(id, request))
                 return new Response<BookDto?>(null, (int)StatusCodeEnum.BadRequest, "O ID do livro não corresponde ao ID fornecido na URL");
-            }
+
+            var validationResult = await request.GetValidationResult();
+
+            if (!await IsValidRequest(validationResult))
+                return new Response<BookDto?>(
+                    null,
+                    (int)StatusCodeEnum.BadRequest,
+                    "Não foi possível atualizar o livro",
+                    validationResult.Errors.Select(e => e.ErrorMessage));
 
             var book = await repository.GetByIdAsync(request.Id);
 
@@ -144,16 +139,9 @@ public class BookHandler(
                 return new Response<BookDto?>(null, (int)StatusCodeEnum.NotFound, "Livro não encontrado !");
             }
 
-            var validationResult = await request.GetValidationResult();
+            book.ChangeEntityProperties(request);
 
-            if (!validationResult.IsValid)
-                return new Response<BookDto?>(
-                    null,
-                    (int)StatusCodeEnum.BadRequest,
-                    "Não foi possível atualizar o livro",
-                    validationResult.Errors.Select(e => e.ErrorMessage));
-
-            var bookUpdated = await repository.UpdateAsync(request.ToEntity());
+            var bookUpdated = await repository.UpdateAsync(book);
 
             return new Response<BookDto?>(bookUpdated.ToDto(), message: "Livro atualizado com sucesso !");
         }
@@ -180,7 +168,7 @@ public class BookHandler(
                 return new Response<BookDto?>(null, (int)StatusCodeEnum.NotFound, "Livro não encontrado !");
             }
 
-            await repository.RemoveAsync(request.Id);
+            await repository.RemoveAsync(book);
 
             logger.LogInformation("Livro excluído com sucesso: {Id}", request.Id);
 
@@ -192,5 +180,61 @@ public class BookHandler(
 
             return new Response<BookDto?>(null, (int)StatusCodeEnum.InternalServerError, "Não foi possível excluir o livro", [ex.Message]);
         }
+    }
+
+    private async Task<bool> IsRequestIdNotEqualToUrlId(Guid id, UpdateBookRequest request)
+    {
+        logger.LogInformation("Verificando se o ID do livro é igual ao ID fornecido na URL.");
+
+        if (id != request.Id)
+        {
+            logger.LogWarning("O ID do livro na requisição [{Id}] não corresponde ao ID fornecido na URL [{Id}].", request.Id, id);
+            return true;
+        }
+
+        return await Task.FromResult(false);
+    }
+
+    private async Task<bool> IsValidRequest(ValidationResult validationResult)
+    {
+        logger.LogInformation("Iniciando validação do livro");
+
+        if (!validationResult.IsValid)
+        {
+            logger.LogWarning("Validação falhou. Erros: {Errors}", validationResult.Errors);
+
+            return await Task.FromResult(false);
+        }
+
+        logger.LogInformation("Válido.");
+
+        return await Task.FromResult(true);
+    }
+
+    private async Task<bool> NotExistsAuthorAndGenre(CreateBookRequest request)
+    {
+        logger.LogInformation("Validando se o autor e gênero existem na base.");
+
+        if (!await authorRepository.ExistsAsync(a => a.Id == request.AuthorId) && !await genreRepository.ExistsAsync(g => g.Id == request.GenreId))
+        {
+            logger.LogWarning("O autor de ID [{AuthorId}] e o gênero de ID [{GenreId}] não existem na base de dados.", request.AuthorId, request.GenreId);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private async Task<bool> ExistsBookWithAuthorAndGenre(CreateBookRequest request)
+    {
+        logger.LogInformation("Verificando se já existe um livro com o mesmo autor e gênero.");
+
+        if (await repository.ExistsAsync(b => b.AuthorId == request.AuthorId && b.GenreId == request.GenreId))
+        {
+            logger.LogWarning("Já existe um livro com o autor de ID [{AuthorId}] e gênero de ID [{GenreId}].", request.AuthorId, request.GenreId);
+            return true;
+        }
+
+        return false;
     }
 }

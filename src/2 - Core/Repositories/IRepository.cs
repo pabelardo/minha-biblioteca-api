@@ -12,7 +12,7 @@ public interface IRepository<TEntity> : IDisposable where TEntity : Entity
         Expression<Func<TEntity, bool>>? predicate = null,
         params Expression<Func<TEntity, object>>[] includes);
     Task<TEntity> UpdateAsync(TEntity entity);
-    Task RemoveAsync(Guid id);
+    Task RemoveAsync(TEntity entity);
     Task<IQueryable<TEntity>> GetQueryable(bool noTracking = false);
     Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate);
     Task<int> SaveChangesAsync();

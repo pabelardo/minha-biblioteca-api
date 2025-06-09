@@ -24,8 +24,6 @@ public class UpdateBookEndpoint : IEndpoint
         UpdateBookRequest request,
         Guid id)
     {
-        request.Id = id;
-
         var result = await handler.UpdateAsync(id, request);
 
         return result.StatusCode switch
